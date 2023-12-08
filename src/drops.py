@@ -15,13 +15,12 @@ class Drops:
             method: Literal["std_deviation", "mean", "iqr"],
             alpha: float = None
     ):
-        self.drops = {}
         self.method: Callable = {"std_deviation": self.std_deviation, "mean": self.mean, "iqr": self.iqr}[method]
         self.alpha = alpha or 2
         self.data: dict = {}
         self.team_list: list[dict[str, str | int]] = []
         self.teams: dict[int, str] = {}
-        self.full_scores: dict[str, list[int]] = {}
+        self.full_scores: dict[int, list[int]] = {}
         self.events: list[str] = []
         self.trial_events: list[str] = []
         self.total_scores: dict[str, int] = {}
@@ -124,5 +123,5 @@ if __name__ == '__main__':
     """
     Example usage:
     """
-    drops = Drops("data/2023-05-20_nationals_c.yaml", "std_deviation", alpha=1)
+    drops = Drops("../data/2023-05-20_nationals_c.yaml", "std_deviation", alpha=1.25)
     drops.drop()
