@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Generator
 
+import numpy as np
 import yaml
 
 
@@ -18,26 +19,38 @@ class Results:
         self._score_sum: dict[int, int]
         self._averages: dict[int, float]
         self._raw_placements: list[dict[str, str | int]]
+        self._team_names: set[str]
 
     def _populate(self) -> None:
         self._load_data()
-        self._teams_data = sorted(self._data.get("Teams"), key=lambda x: x['number'])
-        self._teams = {team['number']: (team['school'] + " " + team.get('suffix', "")) for team in self._teams_data}
-        self._events = [event['name'] for event in self._data.get('Events')]
-        self._trial_events = [event['name'] for event in self._data.get('Events') if event.get('trial', False)]
+        self._teams_data = sorted(self._data.get("Teams"), key=lambda x: x["number"])
+        self._teams = {
+            team["number"]: (team["school"] + " " + team.get("suffix", ""))
+            for team in self._teams_data
+        }
+        self._events = [event["name"] for event in self._data.get("Events")]
+        self._trial_events = [
+            event["name"]
+            for event in self._data.get("Events")
+            if event.get("trial", False)
+        ]
         full_scores = {t: [] for t in self.teams}
-        for placement in self._data.get('Placings'):
-            team_number = placement['team']
+        for placement in self._data.get("Placings"):
+            team_number = placement["team"]
             full_scores[team_number].append(
-                placement.get('place', len(self.teams))
-            ) if placement['event'] not in self.trial_events else 0
+                placement.get("place", len(self.teams))
+            ) if placement["event"] not in self.trial_events else 0
         self._full_scores = full_scores
-        self._score_sum = {t: sum(self.full_scores[t]) for t in self.teams}
-        self._averages = {t: self.score_sum[t] / (len(self.events) - len(self.trial_events)) for t in self.teams}
-        self._raw_placements = self._data.get('Placings')
+        self._score_sum = {t: np.sum(self.full_scores[t]) for t in self.teams}
+        self._averages = {
+            t: self.score_sum[t] / (len(self.events) - len(self.trial_events))
+            for t in self.teams
+        }
+        self._raw_placements = self._data.get("Placings")
+        self._team_names = set([g["school"] for g in self.teams_data])
 
     def _load_data(self) -> None:
-        with open(self.results_path, 'r') as file:
+        with open(self.results_path, "r") as file:
             self._data = yaml.safe_load(file)
 
     @property
@@ -114,3 +127,18 @@ class Results:
     @property
     def raw_placements(self) -> list[dict[str, str | int]]:
         return self._raw_placements
+
+    @property
+    def team_names(self) -> set[str]:
+        return self._team_names
+
+    @property
+    def tournament(self) -> dict[str, str]:
+        return self._data["Tournament"]
+
+    def visualize(self) -> None:
+        """
+        :return: None
+        To be overridden by subclasses
+        """
+        pass
