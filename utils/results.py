@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Generator
+
 import yaml
 
 
@@ -64,6 +66,15 @@ class Results:
         """
 
         return self._events
+
+    @property
+    def walk_events(self) -> Generator[str]:
+        """
+        :return: Generator of event names
+        :exe: 'Event 1', 'Event 2', ...
+        """
+
+        yield from (event for event in self.events if event not in self.trial_events)
 
     @property
     def trial_events(self) -> list[str]:
