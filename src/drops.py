@@ -65,8 +65,6 @@ class Drops(Results):
         score_with_drops = {t: sum(score_copy[t]) for t in score_copy}
 
         sorted_scores = dict(sorted(score_with_drops.items(), key=lambda item: item[1]))
-        # print(f"After dropping {drop} events: \n")
-        # print(utils.pretty_print(self.teams, sorted_scores))
         self.dropped_scores = sorted_scores
         # return sorted_scores
 
