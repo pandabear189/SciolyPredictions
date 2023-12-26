@@ -20,6 +20,19 @@ class Results:
         self._averages: dict[int, float]
         self._raw_placements: list[dict[str, str | int]]
         self._team_names: set[str]
+        self._weight: float = 1
+
+    def __lt__(self, other) -> bool:
+        return self.weight < other.weight
+
+    def __gt__(self, other) -> bool:
+        return self.weight > other.weight
+
+    def __eq__(self, other) -> bool:
+        return self.weight == other.weight
+
+    def __float__(self) -> float:
+        return self.weight
 
     def _populate(self) -> None:
         self._load_data()
@@ -52,6 +65,14 @@ class Results:
     def _load_data(self) -> None:
         with open(self.results_path, "r") as file:
             self._data = yaml.safe_load(file)
+
+    @property
+    def weight(self) -> float:
+        return self._weight
+
+    @weight.setter
+    def weight(self, value: float) -> None:
+        self._weight = value
 
     @property
     def teams_data(self) -> list[dict[str, str | int]]:

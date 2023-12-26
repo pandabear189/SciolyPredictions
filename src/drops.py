@@ -29,10 +29,22 @@ class Drops(Results):
         self.averaged_bombed_events = sum(
             [len(self.bombed_events[t]) for t in self.bombed_events]
         ) / len(self.teams)
+        self._teams_without_suffix: dict[int, str] = {}
+        self._populate()
+        self.__dropped: bool = False
+        self.non_trial_events: list = []
+        self._ret_scores: dict[str, int] = {}
+        self.to_drop = 0
 
     def _populate(self) -> None:
         super()._populate()
         self.bombed_events = {t: [] for t in self.teams}
+        self._teams_without_suffix = {
+            team["number"]: team["school"] for team in self._teams_data
+        }
+        self._non_trials = [
+            event for event in self.events if event not in self.trial_events
+        ]
 
     def iqr(self):
         for placement in self.raw_placements:
@@ -65,7 +77,6 @@ class Drops(Results):
 
     def drop(self) -> None:
         """
-
         :return:  dict[str, int], sorted scores {name: sum(event placements), ...} after dropping
         """
         self._method()
@@ -74,6 +85,7 @@ class Drops(Results):
             sum([len(self.bombed_events[t]) for t in self.bombed_events])
             / len(self.teams)
         )
+        self.to_drop = drop
 
         for _ in range(drop):
             for team in score_copy:
@@ -83,9 +95,29 @@ class Drops(Results):
 
         sorted_scores = dict(sorted(score_with_drops.items(), key=lambda item: item[1]))
         self.dropped_scores = sorted_scores
+        self.__dropped = True
         # return sorted_scores
 
+    def __handle_model(self) -> None:
+        tnumber_sum_results = {t: np.sum(self.full_scores[t]) for t in self.teams}
+        print(len(self.non_trial_events), len(self.teams)   )
+        f_results = {t: len(self._non_trials)*len(self.teams) for t in self.team_names}
+        for t in tnumber_sum_results:
+            tname = self._teams_without_suffix[t]
+            f_results[tname] = min(f_results[tname], tnumber_sum_results[t])
+
+        self._ret_scores = f_results
+
+    @property
+    def ret_scores(self) -> dict[str, int]:
+        self.__handle_model()
+        if not self.__dropped:
+            raise NotImplementedError("You must drop scores before returning")
+        return dict(sorted(self._ret_scores.items(), key=lambda item: item[1]))
+
     def visualize(self):
+        if not self.__dropped:
+            raise NotImplementedError("You must drop scores before visualizing")
         fig, ax = plt.subplots()
         ax.set_title(
             "\n".join(
@@ -144,4 +176,6 @@ if __name__ == "__main__":
         "../data/2023-02-18_penn_invitational_c.yaml", "std_deviation", alpha=1.25
     )
     drops.drop()
+    utils.pretty_print(drops.teams, drops.dropped_scores)
+    print(drops.ret_scores)
     drops.visualize()
