@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Generator
-
 import numpy as np
 import yaml
 
@@ -20,7 +19,7 @@ class Results:
         self._averages: dict[int, float]
         self._raw_placements: list[dict[str, str | int]]
         self._team_names: set[str]
-        self._weight: float = 1
+        self._weight: float = 0
 
     def __lt__(self, other) -> bool:
         return self.weight < other.weight

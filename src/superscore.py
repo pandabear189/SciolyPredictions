@@ -7,7 +7,7 @@ from utils.results import Results
 
 
 class SuperScoreModel(Results):
-    def __init__(self, results_path: str):
+    def __init__(self, results_path: str, weight: float):
         super().__init__(results_path)
         self._super_scores: dict[str, int] = {}
         self._super_placements: dict[int, list[int]] = {}
@@ -15,6 +15,7 @@ class SuperScoreModel(Results):
         self._pre_aggregate_scores: dict[str, list[int]] = {}
         self._teams_without_suffix: dict[int, str] = {}
         self._full_res_wo_suffix: dict[int, list[int]] = {}
+        self.weight = weight
         self._populate()
         self._non_trials: list[str] = []
 
