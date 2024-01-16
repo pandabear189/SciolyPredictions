@@ -9,3 +9,4 @@ There is a .ipynb (notebook) file and .py file that do the same thing, the .py i
 
 [Aggregate using models](demos/tournament.ipynb)
 
+Check out the [behind the scenes](src/) !! (apologies for inefficient python, should've used dataframes 😭😭)
